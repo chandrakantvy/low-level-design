@@ -217,7 +217,6 @@ class Board {
         players.get(newPosition).add(player);
     }
 
-
 }
 
 class Dice {
