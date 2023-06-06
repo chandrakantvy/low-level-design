@@ -1,6 +1,8 @@
-package LLD.TwoZeroFourEight.models;
+package LLD.TwoZeroFourEight.services;
 
 import java.util.Scanner;
+
+import LLD.TwoZeroFourEight.models.Board;
 
 public class Game {
     private Board board;
@@ -32,9 +34,9 @@ public class Game {
         boolean isShifted = false;
         boolean isMerged = false;
         String message = "";
-        while (true) {
+        while (isMergePossible && !isWon) {
             displayBoard();
-            System.out.print("To contiue press: U/R/D/L, To Abort pres: any Other key: ");
+            System.out.print("To contiue press: U/R/D/L; To Abort press: Q key -> ");
             ch = sc.next().toCharArray()[0];
             if (ch == 'U' || ch == 'R' || ch == 'D' || ch == 'L') {
                 System.out.print("Shifting and merging to: ");
@@ -43,23 +45,25 @@ public class Game {
                 
                 isMerged = board.merge(ch);
                 isWon = board.isWon(winningScore);
-                if (isWon) {
-                    message = "Congratulations! You won :)";
-                }
+            
+                // either shift or merge will create empty cells
                 if (isShifted || isMerged) {
                     board.fillRandomEmptyCell();
-                } else {
-                    isMergePossible = board.isMergeable();
                 }
-                if (!isMergePossible && !isWon) {
-                    displayBoard();
-                    message = "Game Over";
-                    break;
-                }
+
+                // check if merge is possible if no shift or merge happened earlier
+                isMergePossible = board.isMergeable();
+            
                 if (isWon) {
+                    message = "Congratulations! You won :)";
                     displayBoard();
-                    break;
                 }
+
+                if (!isMergePossible) {
+                    displayBoard();
+                    message = "Cannot be merged anymore :(";
+                }
+                
             } else {
                 message = "Game Aborted!";
                 break;

@@ -35,18 +35,21 @@ public class Board {
         board[row2][col2] = 2;
     }
 
-    public boolean shift(char command) {
+    // shift the values based on direction
+    public boolean shift(char direction) {
         int i, j;
         boolean isShiftPossible = false;
-        switch (command) {
+        switch (direction) {
             case 'U':
                 for (int col=0; col < size; col++) {
                     i = 0; 
                     j = 0;
                     while (i < size) {
+                        // empty cell, move i forward
                         if (board[i][col] == -1) {
                             i++;
                         } else {
+                            // not empty cell
                             if (i != j) {
                                 board[j][col] = board[i][col];
                                 isShiftPossible = true;
@@ -55,6 +58,7 @@ public class Board {
                             j++;
                         }
                     }
+                    // j to i all will be empty cells after shifting
                     for (; j<size; j++) {
                         board[j][col] = -1;
                     }
@@ -129,24 +133,26 @@ public class Board {
         return isShiftPossible;
     }
 
-    public boolean merge(char command) {
+    // merge the values based on direction
+    public boolean merge(char direction) {
         int i, j;
         boolean isMerged = false;
-        switch (command) {
+        switch (direction) {
             case 'U':
                 for (int col=0; col < size; col++) {
                     i = 0; 
                     j = 0;
                     while (i < size) {
+                        // emtpy cell
                         if (board[i][col] == -1) {
                             i++;
-                        } else if (i!=size-1 && board[i][col] == board[i+1][col]) {
+                        } else if (i!=size-1 && board[i][col] == board[i+1][col]) { // merge possible
                             isMerged = true;
                             board[j][col] = board[i][col] * 2;
                             board[i+1][col] = -1;
-                            i += 2;
+                            i += 2; // moving i to next possible number
                             j++;
-                        } else {
+                        } else { // no merge but shift possible
                             if (i != j) {
                                 board[j][col] = board[i][col];
                                 isMerged = true;
@@ -249,14 +255,10 @@ public class Board {
     }
 
     public boolean isWon(int winningScore) {
-        emptyCells = new ArrayList<>();
         for (int row=0; row<size; row++) {
             for (int col = 0; col<size; col++) {
                 if (board[row][col] == winningScore) {
                     return true;
-                }
-                else if (board[row][col] == -1) {
-                    emptyCells.add(new int[]{row, col});
                 }
             }
         }
@@ -267,8 +269,22 @@ public class Board {
         return emptyCells.size();
     }
 
+    // find the empty cell 
+    private void findEmptyCells() {
+        emptyCells = new ArrayList<>();
+        for (int r=0; r<size; r++) {
+            for (int c=0; c<size; c++) {
+                if (board[r][c] == -1)
+                    emptyCells.add(new int[]{r, c});
+            }
+        }
+    }
+
+    // generate the new cell value for empty cell
     public void fillRandomEmptyCell() {
+        findEmptyCells();
         int randomEmptyCell = new Random().nextInt(this.getEmptyCellCnt());
+
         if (this.getEmptyCellCnt() == 0)
             return;
         int row = emptyCells.get(randomEmptyCell)[0];
@@ -290,14 +306,22 @@ public class Board {
         }
     }
 
+    // check if the merge is possible when all the cell are filled
     public boolean isMergeable() {
-        for (int i=0; i<size-1; i++) {
-            for (int j=0; j<size-1; j++) {
-                if (board[i][j] == board[i+1][j] || board[i][j] == board[i][j+1])
-                    return true;
+        findEmptyCells();
+
+        if (getEmptyCellCnt() > 0)
+            return true;
+        
+        for (int i=0; i<size; i++) {
+            for (int j=0; j<size; j++) {
+                if ((i != size - 1 && board[i][j] == board[i+1][j]) ||
+                    (j != size - 1 && board[i][j] == board[i][j+1])) {
+                        return true;
+                    }
             }
         }
-        return getEmptyCellCnt() != 0;
+        return false;
     }
     
 }
